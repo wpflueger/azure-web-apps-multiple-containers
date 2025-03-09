@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    image: wpflueger/azure-dev-backend:latest
+    build:
+      context: ./backend
+    # The backend container now listens on port 80 internally
+    expose:
+      - "80"
+    networks:
+      - app-network
+
+  frontend:
+    image: wpflueger/azure-dev-frontend:latest
+    # The frontend container will get REACT_APP_API_ROOT from the runtime environment,
+    # which you must set in your Azure Web App configuration (e.g., via Application Settings)
+    environment:
+      - REACT_APP_API_ROOT=${REACT_APP_API_ROOT}
+    networks:
+      - app-network
+
+  reverse-proxy:
+    image: wpflueger/azure-dev-nginx:latest
+    build:
+      context: ./nginx-proxy
+    # The reverse proxy listens on port 80 externally and routes requests to backend and frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

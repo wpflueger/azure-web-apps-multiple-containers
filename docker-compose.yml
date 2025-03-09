@@ -11,11 +11,11 @@ services:
     build:
       context: ./frontend
       args:
-        REACT_APP_API_ROOT: "http://localhost:8000"
+        REACT_APP_API_ROOT: "${REACT_APP_API_ROOT}"
     container_name: frontend
     ports:
       - "80:80"
     depends_on:
       - backend
     environment:
-      - REACT_APP_API_ROOT=http://localhost:8000
+      - REACT_APP_API_ROOT=${REACT_APP_API_ROOT}

@@ -1,18 +1,32 @@
 import React, { useState } from 'react';
 
+declare global {
+  interface Window {
+    _env_?: {
+      REACT_APP_API_ROOT: string;
+    }
+  }
+}
+
 const App: React.FC = () => {
   const [message, setMessage] = useState<string>('Click the button to call the backend');
   const [count, setCount] = useState<number>(0);
 
   const handleClick = async () => {
+    let data;
+    // Use local env if defined (runs with npm run start) else use runtime injection
+    const apiRoot = process.env.REACT_APP_API_ROOT || window._env_?.REACT_APP_API_ROOT || '/api';
+
     try {
-      // Calling the FastAPI endpoint
-      console.log(process.env.REACT_APP_API_ROOT);
-      const response = await fetch(`${process.env.REACT_APP_API_ROOT}/api/click`);
-      const data = await response.json();
+      console.log("Process env API ROOT:", process.env.REACT_APP_API_ROOT);
+      console.log("Window env API ROOT:", window._env_?.REACT_APP_API_ROOT);
+      console.log("API ROOT:", apiRoot);
+      const response = await fetch(`${apiRoot}/click`);
+      data = await response.json();
       setMessage(data.message);
       setCount(data.count);
     } catch (error) {
+      console.error('Failed to fetch from backend. Data:', data, 'Error:', error);
       setMessage('Error connecting to backend');
     }
   };
